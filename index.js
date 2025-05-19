@@ -21,7 +21,7 @@ for (const file of commandFiles) {
 }
 
 // Paste your YouTube cookie string here (get from browser, as explained)
-const YOUTUBE_COOKIE_STRING = "GPS=1; PREF=f6=40000000&tz=Asia.Dhaka";
+const YOUTUBE_COOKIE_STRING = "SID=xyz; HSID=xyz; SSID=xyz; SAPISID=xyz; APISID=xyz; LOGIN_INFO=xyz; GPS=1; PREF=f6=40000000&tz=Asia.Dhaka";
 
 client.distube = new DisTube(client, {
   plugins: [
