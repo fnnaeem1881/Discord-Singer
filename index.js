@@ -13,7 +13,6 @@ const client = new Client({
   ]
 });
 
-// Load commands from ./commands folder
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
@@ -21,10 +20,9 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-// Your YouTube cookies as a properly formatted string (no JSON)
+// Paste your YouTube cookie string here (get from browser, as explained)
 const YOUTUBE_COOKIE_STRING = "GPS=1; PREF=f6=40000000&tz=Asia.Dhaka";
 
-// Setup DisTube with yt-dlp plugin and cookie headers for YouTube access
 client.distube = new DisTube(client, {
   plugins: [
     new YtDlpPlugin({
@@ -44,20 +42,21 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
-// Listen for commands starting with "!"
 client.on('messageCreate', async message => {
   if (message.author.bot || !message.content.startsWith('!')) return;
 
-  // Check if the bot has the necessary permissions to read history and send messages in this channel
-  const neededPerms = [PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.SendMessages];
   const botMember = message.guild.members.me;
 
-  if (!botMember) return; // Should never happen but safety check
+  // Permissions the bot absolutely needs to operate here
+  const neededPerms = [
+    PermissionsBitField.Flags.ReadMessageHistory,
+    PermissionsBitField.Flags.SendMessages
+  ];
 
   const missing = neededPerms.filter(perm => !message.channel.permissionsFor(botMember).has(perm));
   if (missing.length) {
-    console.warn(`Missing permissions in #${message.channel.name}: ${missing.join(', ')}`);
-    return; // Skip command handling if permissions missing
+    console.warn(`Missing permissions in #${message.channel.name}: ${missing.map(p => PermissionsBitField.Flags[p] || p).join(', ')}`);
+    return; // Don't run if missing important permissions
   }
 
   const args = message.content.slice(1).trim().split(/ +/);
@@ -77,7 +76,7 @@ client.on('messageCreate', async message => {
   }
 });
 
-// Distube event handlers with permission checks
+// Distube event handlers
 client.distube
   .on('playSong', (queue, song) => {
     if (queue.textChannel.permissionsFor(queue.client.user).has(PermissionsBitField.Flags.SendMessages)) {
@@ -96,5 +95,4 @@ client.distube
     }
   });
 
-// Log in your Discord bot using token from .env file
 client.login(process.env.DISCORD_TOKEN);
