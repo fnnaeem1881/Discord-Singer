@@ -38,6 +38,7 @@ client.distube = new DisTube(client, {
   emitNewSongOnly: true
 });
 
+
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
