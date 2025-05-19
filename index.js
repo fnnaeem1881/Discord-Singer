@@ -14,16 +14,19 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+
+// Load commands dynamically from ./commands folder
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
   client.commands.set(command.name, command);
 }
 
+// Setup DisTube with yt-dlp plugin and ffmpeg-static under the hood
 client.distube = new DisTube(client, {
   plugins: [new YtDlpPlugin()],
   leaveOnEmpty: true,
-  emitNewSongOnly: true
+  emitNewSongOnly: true,
 });
 
 client.once('ready', () => {
@@ -36,6 +39,7 @@ client.on('messageCreate', async message => {
   const commandName = args.shift().toLowerCase();
   const command = client.commands.get(commandName);
   if (!command) return;
+
   try {
     await command.execute(message, args, client.distube);
   } catch (error) {
@@ -44,13 +48,17 @@ client.on('messageCreate', async message => {
   }
 });
 
+// DisTube event listeners
 client.distube
-  .on('playSong', (queue, song) => queue.textChannel.send(`🎶 Playing: \`${song.name}\``))
-  .on('addSong', (queue, song) => queue.textChannel.send(`✅ Added: \`${song.name}\``))
-
-  .on('error', (channel, e) => {
-    console.error(e);
-    channel.send('❌ An error occurred: ' + e.message);
+  .on('playSong', (queue, song) =>
+    queue.textChannel.send(`🎶 Now playing: \`${song.name}\` - \`${song.formattedDuration}\``)
+  )
+  .on('addSong', (queue, song) =>
+    queue.textChannel.send(`✅ Added to queue: \`${song.name}\` - \`${song.formattedDuration}\``)
+  )
+  .on('error', (channel, error) => {
+    console.error(error);
+    if (channel) channel.send(`❌ An error occurred: ${error.message}`);
   });
 
 client.login(process.env.DISCORD_TOKEN);
