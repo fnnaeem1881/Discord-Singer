@@ -1,9 +1,10 @@
 module.exports = {
-  name: 'stop',
+  name: 'resume',
   async execute(message, args, distube) {
     const queue = distube.getQueue(message.guildId);
     if (!queue) return message.reply('No song is playing.');
-    queue.stop();
-    message.reply('⏹️ Stopped playback and cleared the queue.');
+    if (!queue.paused) return message.reply('The music is already playing.');
+    queue.resume();
+    message.reply('▶️ Resumed the music.');
   }
 };

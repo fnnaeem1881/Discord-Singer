@@ -1,9 +1,10 @@
 module.exports = {
   name: 'pause',
-  execute(message, args, distube) {
-    const queue = distube.getQueue(message);
-    if (!queue) return message.channel.send('❌ Nothing is playing.');
-    distube.pause(message);
-    message.channel.send('⏸️ Music paused.');
+  async execute(message, args, distube) {
+    const queue = distube.getQueue(message.guildId);
+    if (!queue) return message.reply('No song is playing.');
+    if (queue.paused) return message.reply('Already paused.');
+    queue.pause();
+    message.reply('⏸️ Paused the music.');
   }
 };

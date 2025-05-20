@@ -1,21 +1,25 @@
 module.exports = {
   name: 'play',
-  description: 'Play a song from YouTube or other supported sources',
   async execute(message, args, distube) {
-    if (!message.member.voice.channel) {
-      return message.reply('You need to be in a voice channel to play music!');
-    }
-    if (!args.length) {
-      return message.reply('Please provide a song name or URL!');
-    }
+    if (!args.length) return message.reply('Please provide a song name or URL.');
+
     try {
+      const queue = distube.getQueue(message.guild.id);
+      // queue might be undefined here, so don't access queue.songs yet
+
       await distube.play(message.member.voice.channel, args.join(' '), {
-        textChannel: message.channel,
         member: message.member,
+        textChannel: message.channel,
       });
-    } catch (error) {
-      console.error(error);
-      message.reply('Error occurred while trying to play the song.');
+
+      const newQueue = distube.getQueue(message.guild.id);
+      if (!newQueue || !newQueue.songs.length) return message.channel.send('Something went wrong with the queue.');
+
+      message.channel.send(`🎶 Now playing: \`${newQueue.songs[0].name}\``);
+
+    } catch (e) {
+      console.error(e);
+      message.reply('Failed to play the song.');
     }
   },
 };
